@@ -10,70 +10,29 @@ namespace BInaryTree
     {
         static void Main(string[] args)
         {
-            NodeTree tree = new NodeTree();
+            /*
+                        NodeTree tree = new NodeTree();
 
-            tree.Find(10,tree.Main);
-            tree.Find(5,tree.Main);
-                 
-            tree.Find(3,tree.Main);
-            tree.Find(2,tree.Main);
-            tree.Find(4,tree.Main);
-            tree.Find(1,tree.Main);
-                 
-            tree.Find(7,tree.Main);
-            tree.Find(6,tree.Main);
-            tree.Find(8,tree.Main);
-            tree.Find(9,tree.Main);
-                 
-                 
-            tree.Find(15,tree.Main);
-                 
-            tree.Find(13,tree.Main);
-            tree.Find(12,tree.Main);
-            tree.Find(14,tree.Main);
-            tree.Find(11,tree.Main);
-                 
-            tree.Find(17,tree.Main);
-            tree.Find(19,tree.Main);
-            tree.Find(16,tree.Main);
-            tree.Find(18,tree.Main);
-            tree.Find(20,tree.Main);
-
-
-            /*tree.Add(10);
-
-            tree.Add(5);
-
-            tree.Add(3);
-            tree.Add(2);
-            tree.Add(4);
-            tree.Add(1);
-
-            tree.Add(7);
-            tree.Add(6);
-            tree.Add(8);
-            tree.Add(9);
-
-
-            tree.Add(15);
-
-            tree.Add(13);
-            tree.Add(12);
-            tree.Add(14);
-            tree.Add(11);
-
-            tree.Add(17);
-            tree.Add(19);
-            tree.Add(16);
-            tree.Add(18);
-            tree.Add(20);
+                        NodeTree.Print(tree.Main);
+                        Console.WriteLine();
             */
 
-            NodeTree.Print(tree.Main);
+            string calc = "3 + 4 * 2 / ( 1 - 5 ) ^ 2 ^ 3";
+
+
+            Pshe q = new Pshe();
+
+            var t = q.ConvertToPostfixNotation(calc);
+
+            foreach (var item in t)
+            {
+                Console.Write(item + " ");
+            }
+
             Console.WriteLine();
 
-
-
+            NodeTreePshe test = new NodeTreePshe();
+            test.Create(t);
         }
 
     }
@@ -87,15 +46,6 @@ namespace BInaryTree
             get => val;
             set => val = value;
         }
-
-
-        //private node father;
-
-        //public node father
-        //{
-        //    get { return father; }
-        //    set { father = value; }
-        //}
 
         private Node lSon;
 
@@ -197,6 +147,235 @@ namespace BInaryTree
             Print(cur.RSon);
 
         }
+
+
+
+    }
+
+    class NodePshe
+    {
+        private string val;
+        public string Val
+        {
+            get => val;
+            set => val = value;
+        }
+
+        private NodePshe lSon;
+
+        public NodePshe LSon
+        {
+            get { return lSon; }
+            set { lSon = value; }
+        }
+
+        private NodePshe rSon;
+
+        public NodePshe RSon
+        {
+            get { return rSon; }
+            set { rSon = value; }
+        }
+
+
+        public NodePshe(string val)
+        {
+            this.val = val;
+        }
+
+        public NodePshe()
+        { }
+
+    }
+
+    class NodeTreePshe
+    {
+        NodePshe main;
+        public NodePshe Main
+        {
+            get => main;
+
+        }
+
+        List<string> psheSTR = new List<string>();
+        int item = 0;
+        public void Create(List<string> pshe)
+        {
+            if (pshe.Count <= 0)
+                return;
+            psheSTR = pshe;
+            item = psheSTR.Count;
+            main = new NodePshe(pshe.Last());
+
+            //NodePshe runner = Main;
+            item -= 1;
+            main.RSon = new NodePshe();
+            Place(main.RSon);
+            main = main.RSon;
+
+            Print(main);
+
+            //item -= 2;
+            //main.LSon= new NodePshe();
+            //Place(main.LSon);
+
+
+
+
+        }
+
+        void Place(NodePshe sonNode)
+        {
+            if (item < 0)
+                return;
+
+            int num = 0;
+
+            if (int.TryParse(psheSTR[item], out num))
+            {
+                sonNode.Val = psheSTR[item];
+                return;
+            }
+            else
+            {
+                sonNode.Val  = psheSTR[item];
+                sonNode.RSon = new NodePshe();
+                item -= 1;
+                Place(sonNode.RSon);
+                item -= 1;
+                sonNode.LSon = new NodePshe();
+                Place(sonNode.LSon);
+
+
+            }
+        }
+
+        static public void Print(NodePshe cur)
+        {
+            if (cur == null)
+                return;
+            Print(cur.LSon);
+            Console.Write(cur.Val + " ");
+            Print(cur.RSon);
+
+        }
+
+
+
+    }
+
+    class Pshe
+    {
+
+
+        private List<string> operators = new List<string>(new string[] { "(", ")", "+", "-", "*", "/", "^" });
+
+        private List<string> Separate(string input)
+        {
+
+            List<string> ans = new List<string>();
+            int pos = 0;
+            while (pos < input.Length)
+            {
+                string s = input[pos].ToString();
+                if (!operators.Contains(input[pos].ToString()))
+                {
+                    if (Char.IsDigit(input[pos]))
+                        for (int i = pos + 1; i < input.Length &&
+                            (Char.IsDigit(input[i]) || input[i] == ',' || input[i] == '.'); i++)
+                            s += input[i];
+                    else if (Char.IsLetter(input[pos]))
+                        for (int i = pos + 1; i < input.Length &&
+                            (Char.IsLetter(input[i]) || Char.IsDigit(input[i])); i++)
+                            s += input[i];
+                }
+                ans.Add(s);
+                pos += s.Length;
+            }
+
+            return ans;
+        }
+        private byte GetPriority(string s)
+        {
+            switch (s)
+            {
+                case "(":
+                case ")":
+                    return 0;
+                case "+":
+                case "-":
+                    return 1;
+                case "*":
+                case "/":
+                    return 2;
+                case "^":
+                    return 3;
+                default:
+                    return 4;
+            }
+        }
+
+        public List<string> ConvertToPostfixNotation(string input)
+        {
+            List<string> outputSeparated = new List<string>();
+            Stack<string> stack = new Stack<string>();
+            foreach (string c in Separate(input))
+            {
+                if (operators.Contains(c))
+                {
+                    if (stack.Count > 0 && !c.Equals("("))
+                    {
+                        if (c.Equals(")"))
+                        {
+                            string s = stack.Pop();
+                            while (s != "(")
+                            {
+                                outputSeparated.Add(s);
+                                s = stack.Pop();
+                            }
+                        }
+                        else if (GetPriority(c) > GetPriority(stack.Peek()))
+                            stack.Push(c);
+                        else
+                        {
+                            while (stack.Count > 0 && GetPriority(c) <= GetPriority(stack.Peek()))
+                            {
+                                outputSeparated.Add(" ");
+                                outputSeparated.Add(stack.Pop());
+                            }
+                            stack.Push(c);
+                        }
+                    }
+                    else
+                        stack.Push(c);
+                }
+                else
+                    outputSeparated.Add(c);
+            }
+            if (stack.Count > 0)
+                foreach (string c in stack)
+                {
+                    outputSeparated.Add(" ");
+                    outputSeparated.Add(c);
+                }
+
+
+            int i = 0;
+            while (i < outputSeparated.Count)
+            {
+                if (string.IsNullOrWhiteSpace(outputSeparated[i]))
+                {
+                    outputSeparated.RemoveAt(i);
+                    continue;
+                }
+                i++;
+            }
+
+            return outputSeparated;
+        }
+
+
+
 
 
 
